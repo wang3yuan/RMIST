@@ -1,11 +1,13 @@
-findGeneExpressionLocationsViaUniprot = function(GeneNames = c("CD180"), SleepTime = 0)
+findGeneExpressionLocationsViaUniprot = function(GeneNames = c("CD180"), SleepTime = 0, Organism = c("Human"))
 {
   TISSUELocation = list()
   for(cGeneName in GeneNames)
   {
-    url = paste0("https://www.uniprot.org/uniprot/?query=", cGeneName,"&format=tab")
+    url = paste0("https://www.uniprot.org/uniprot/?query=gene%3A", cGeneName,"+organism%3A", Organism, "&format=tab")
     QueryResult = read.table(url, header = T, fill = NA, sep = "\t", stringsAsFactors = F)
     EntryIDs = QueryResult[, "Entry"]
+    if(length(EntryIDs) == 0 )
+      next
     TISSUELocation[[cGeneName]] = list()
     for(cEntryID in EntryIDs)
     {
@@ -13,12 +15,11 @@ findGeneExpressionLocationsViaUniprot = function(GeneNames = c("CD180"), SleepTi
       url = paste0("https://www.uniprot.org/uniprot/", cEntryID,".txt") 
       txt = readLines(url)
       txt = txt[grep("TISSUE=", txt)]
-      if(length(txt) > 0)
-      {
-        TISSUELocation[[cGeneName]] = rbind(TISSUELocation[[cGeneName]], 
+      if(length(txt) == 0)
+        next
+      TISSUELocation[[cGeneName]] = rbind(TISSUELocation[[cGeneName]], 
                                             cbind(cEntryID, Location = gsub(".*TISSUE=|;$| \\{.*\\}|\\{.*,", "", txt)))
-      }
-      Sys.sleep(SleepTime)
+      Sys.sleep(ifelse(SleepTime == 0, SleepTime, max(0, SleepTime + rnorm(1, 2, 1))))
     }
     #TISSUELocation[[cGeneName]] = unique(as.character(TISSUELocation[[cGeneName]][, "Location"]))
   }
