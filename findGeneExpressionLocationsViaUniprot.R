@@ -9,7 +9,7 @@ findGeneExpressionLocationsViaUniprot = function(GeneNames = c("CD180"), SleepTi
     TISSUELocation[[cGeneName]] = list()
     for(cEntryID in EntryIDs)
     {
-      print(paste0(cGeneName," ", cEntryID, " ", which(EntryID == cEntryID), "/", length(EntryID)))
+      print(paste0(cGeneName," ", cEntryID, " ", which(EntryID == cEntryID), "/", length(EntryIDs)))
       url = paste0("https://www.uniprot.org/uniprot/", cEntryID,".txt") 
       txt = readLines(url)
       txt = txt[grep("TISSUE=", txt)]
